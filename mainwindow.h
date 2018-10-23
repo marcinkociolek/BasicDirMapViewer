@@ -40,7 +40,9 @@ public:
     int histogramBarWidth;
     int histogramScaleCoef;
 
-
+    bool showCartesianDirHisogram;
+    bool showPolarDirHisogram;
+    bool showConnectedDirHistograms;
 
     int imageToShow;
     double imageScale;
@@ -62,6 +64,7 @@ public:
     void FreeImageVectors();
     void LoadVectors();
     void ShowImage();
+    void ShowHistograms();
     //FileParams  MainWindow::GetDirectionData(path FileToOpen);
 
 private slots:
@@ -106,6 +109,12 @@ private slots:
     void on_spinBoxHistogramScaleCoef_valueChanged(int arg1);
 
 
+
+    void on_checkBoxShowDirCartesianHistogram_toggled(bool checked);
+
+    void on_checkBoxShowPolarHistogram_toggled(bool checked);
+
+    void on_checkBoxShowConnected_toggled(bool checked);
 
 private:
     Ui::MainWindow *ui;

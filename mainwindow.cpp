@@ -64,6 +64,10 @@ MainWindow::MainWindow(QWidget *parent) :
     sameFolders = ui->checkBoxSameFolders->checkState();
     autoLoadVectors = ui->checkBoxAuloLoadVectors->checkState();
 
+    showCartesianDirHisogram = ui->checkBoxShowDirCartesianHistogram->checkState();
+    showPolarDirHisogram = ui->checkBoxShowPolarHistogram->checkState();
+    showConnectedDirHistograms = ui->checkBoxShowConnected->checkState();
+
 }
 
 MainWindow::~MainWindow()
@@ -277,7 +281,7 @@ int *GetDirHistogramForOneImage(FileParams Params)
     return DirHist;
 }
 //------------------------------------------------------------------------------------------------------------------------------
-void PlotDirHistPlanar(int *Hist, int yScaleHeight, int barWidth, int scaleCoef)
+void PlotDirHistPlanar(int *Hist, int yScale, int barWidth, int scaleCoef)
 {
     const int topOffset = 30;
     const int bottomOffset = 30;
@@ -286,20 +290,24 @@ void PlotDirHistPlanar(int *Hist, int yScaleHeight, int barWidth, int scaleCoef)
     const int rightOffset = 20;
     const int digitWidth = 13;
     const int digitHeight = 10;
+
+    int yScaleHeight = 100 * yScale;
+
     Mat ImToShow = Mat(yScaleHeight + topOffset + bottomOffset,leftOffset + rightOffset + 180*(1+barWidth),CV_8UC3,Scalar(255,255,255));
 
     line(ImToShow,Point(leftOffset - 2,yScaleHeight + topOffset),Point(leftOffset - 2,topOffset),Scalar(255.0,0.0,0.0,0.0));
     line(ImToShow,Point(leftOffset - 2,yScaleHeight + topOffset),Point(leftOffset+180*(1+barWidth),yScaleHeight + topOffset),Scalar(255.0,0.0,0.0,0.0));
 
-    for(int y = 0; y <= yScaleHeight; y+= 50)
+    for(int y = 0; y <= yScaleHeight; y+= 100/2)
     {
         line(ImToShow,Point(leftOffset - scaleBarLenht,yScaleHeight + topOffset - y),Point(leftOffset-2 ,yScaleHeight + topOffset - y),Scalar(255.0,0.0,0.0,0.0));
-
-        string text = to_string((int)round((double)y * pow(10.0,scaleCoef * (-1))));
-        int nrOfdigits = (int)(text.size());
-        putText(ImToShow,text,Point(leftOffset - scaleBarLenht -2 - nrOfdigits * digitWidth, yScaleHeight - y + topOffset + digitHeight / 2), FONT_HERSHEY_COMPLEX_SMALL, 1.0, Scalar(255.0,0.0,0.0,0.0));
     }
-
+    for(int y = 0; y <= yScale; y++)
+    {
+        string text = to_string((int)round((double)y * pow(10.0,scaleCoef)));
+        int nrOfdigits = (int)(text.size());
+        putText(ImToShow,text,Point(leftOffset - scaleBarLenht -2 - nrOfdigits * digitWidth, yScaleHeight - y*100 + topOffset + digitHeight / 2), FONT_HERSHEY_COMPLEX_SMALL, 1.0, Scalar(255.0,0.0,0.0,0.0));
+    }
     for(int x = 0; x <= 180; x+= 45)
     {
         line(ImToShow,Point(leftOffset + x * (1 + barWidth) + barWidth /2, yScaleHeight + topOffset),
@@ -314,34 +322,95 @@ void PlotDirHistPlanar(int *Hist, int yScaleHeight, int barWidth, int scaleCoef)
 
     //putText(ImToShow,"0",Point(30,yScaleHeight + 15), FONT_HERSHEY_COMPLEX_SMALL, 1.0, Scalar(255.0,0.0,0.0,0.0));
 
+    Point orygin = Point(leftOffset, yScaleHeight + topOffset);
     for(int dir = 0; dir < 180; dir++)
     {
-        int yOffset = yScaleHeight - (int)round((double)Hist[dir] * pow(10.0,scaleCoef));
-        int yPosition;
-        Point start = Point(leftOffset + dir*(1 + barWidth),yScaleHeight + topOffset);
-        if (yOffset < 0)
+        int barLenght = (int)round((double)Hist[dir] * pow(10.0,scaleCoef * (-1))*100);
+
+        Point start = orygin + Point(dir*(1 + barWidth), 0);
+        if (barLenght > yScaleHeight)
         {
-            yPosition = topOffset;
-            Point stop  = Point(leftOffset + dir*(1 + barWidth) + barWidth - 1,yPosition);
+            barLenght = yScaleHeight;
+            Point stop  = start + Point(barWidth - 1,0 - barLenght);
             rectangle(ImToShow,start,stop,Scalar(0.0, 0.0, 255.0, 0.0),CV_FILLED);
         }
         else
         {
-            yPosition = topOffset + yOffset;
-            Point stop  = Point(leftOffset + dir*(1 + barWidth) + barWidth - 1,yPosition);
+            Point stop  = start + Point(barWidth - 1,0 - barLenght);
             rectangle(ImToShow,start,stop,Scalar(0.0, 0.0, 0.0, 0.0),CV_FILLED);
         }
-
-
-
-
-        //if(maxCount>Hist[dir])
-        //    line(ImToShow,Point(dir,maxCount),Point(dir,maxCount-Hist[dir]),Scalar(0.0,0,0.0,0.0));
-        //else
-        //    line(ImToShow,Point(dir,maxCount),Point(dir,maxCount-1),Scalar(0.0,0,255.0,0.0));
     }
-    //rectangle(ImToShow,Point(10,10),Point(100,100),Scalar(255,255,255,0),-1);
     imshow("PlanarHist",ImToShow);
+}
+//------------------------------------------------------------------------------------------------------------------------------
+void PlotDirHistPolar(int *Hist, int yScale, int barWidth, int scaleCoef, bool showConnected)
+{
+    const int topOffset = 30;
+    const int bottomOffset = 30;
+    const int scaleBarLenht = 5;
+    const int leftOffset = 60;
+    const int rightOffset = 20;
+    const int digitWidth = 13;
+    const int digitHeight = 10;
+    const double pi = 3.14159265359;
+
+    int yScaleHeight = 100 * yScale;
+
+    Mat ImToShow = Mat(yScaleHeight*2+1 + topOffset + bottomOffset, yScaleHeight*2+1+leftOffset + rightOffset, CV_8UC3, Scalar(255,255,255));
+    circle(ImToShow,Point(leftOffset + yScaleHeight, topOffset + yScaleHeight),1,Scalar(0.0,255.0,0.0,0.0));
+    for(int y = 50; y <= yScaleHeight; y+= 50)
+    {
+        circle(ImToShow,Point(leftOffset + yScaleHeight, topOffset + yScaleHeight),y,Scalar(0.0,255.0,0.0,0.0));
+    }
+    for(int y = 1; y <= yScale; y++)
+    {
+        string text = to_string((int)round((double)y * pow(10.0,scaleCoef)));
+        int nrOfdigits = (int)(text.size());
+        putText(ImToShow,text,Point(leftOffset + yScaleHeight - nrOfdigits * digitWidth / 2, topOffset + yScaleHeight - y*100),
+                FONT_HERSHEY_COMPLEX_SMALL, 1.0, Scalar(255.0,0.0,0.0,0.0));
+    }
+
+    if(!showConnected)
+    {
+        Point start = Point(leftOffset + yScaleHeight ,
+                            topOffset  + yScaleHeight);
+
+        for(int dir = 0; dir < 360; dir++)
+        {
+            double barLenght = (double)Hist[dir%180] * pow(10.0,scaleCoef * (-1)) * 100.0;
+            if(barLenght <= yScaleHeight)
+            {
+                Point stop = Point(barLenght * sin((double)dir / 180.0 * pi), barLenght * cos((double)dir / 180.0 * pi));
+                line(ImToShow,start, start + stop, Scalar(0.0, 0.0, 0.0, 0.0),barWidth);
+            }
+            else
+            {
+                barLenght = yScaleHeight ;
+                Point stop = Point(barLenght * sin((double)dir / 180.0 * pi), barLenght * cos((double)dir / 180.0 * pi));
+                line(ImToShow,start, start + stop, Scalar(0.0, 0.0, 255.0, 0.0),barWidth);
+            }
+        }
+    }
+    else
+    {
+        Point start = Point(leftOffset + yScaleHeight ,
+                            topOffset  + yScaleHeight);
+        Point previous;
+        double barLenght = (double)Hist[0] * pow(10.0,scaleCoef * (-1)) * 100.0;
+        Point stop = Point(barLenght * sin(0.0 / 180.0 * pi), barLenght * cos(0.0 / 180.0 * pi));
+
+        previous = start+stop;
+        for(int dir = 1; dir <= 360; dir++)
+        {
+            barLenght = (double)Hist[dir%180] * pow(10.0,scaleCoef * (-1)) * 100.0;
+            stop = Point(barLenght * sin((double)dir / 180.0 * pi), barLenght * cos((double)dir / 180.0 * pi));
+            line(ImToShow,previous, start + stop, Scalar(0.0, 0.0, 0.0, 0.0),1);
+            previous = start+stop;
+        }
+    }
+
+    imshow("Polar Hist",ImToShow);
+
 }
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
@@ -537,11 +606,18 @@ void MainWindow::ShowImage()
     imshow("Image",ImToShow);
     delete[] DirectionalityHist;
     DirectionalityHist = GetDirHistogramForOneImage(Params);
-    PlotDirHistPlanar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef);
-
+    ShowHistograms();
 
 }
 
+void MainWindow::ShowHistograms()
+{
+    if(showCartesianDirHisogram)
+        PlotDirHistPlanar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef);
+    if(showPolarDirHisogram)
+        PlotDirHistPolar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef,showConnectedDirHistograms);
+
+}
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 //          Slots
@@ -694,18 +770,38 @@ void MainWindow::on_checkBoxAuloLoadVectors_toggled(bool checked)
 void MainWindow::on_spinBoxHistogramBarWidth_valueChanged(int arg1)
 {
     histogramBarWidth = arg1;
-    PlotDirHistPlanar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef);
+    ShowHistograms();
 }
 
 
 void MainWindow::on_spinBoxHistogramScaleHeight_valueChanged(int arg1)
 {
     histogramScaleHeight = arg1;
-    PlotDirHistPlanar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef);
+    ShowHistograms();
+
 }
 
 void MainWindow::on_spinBoxHistogramScaleCoef_valueChanged(int arg1)
 {
     histogramScaleCoef = arg1;
-    PlotDirHistPlanar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef);
+    ShowHistograms();
+
+}
+
+void MainWindow::on_checkBoxShowDirCartesianHistogram_toggled(bool checked)
+{
+    showCartesianDirHisogram = checked;
+    ShowHistograms();
+}
+
+void MainWindow::on_checkBoxShowPolarHistogram_toggled(bool checked)
+{
+    showPolarDirHisogram = checked;
+    ShowHistograms();
+}
+
+void MainWindow::on_checkBoxShowConnected_toggled(bool checked)
+{
+    showConnectedDirHistograms = checked;
+    ShowHistograms();
 }
