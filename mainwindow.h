@@ -28,8 +28,19 @@ public:
     boost::filesystem::path OutFolder;
     //boost::filesystem::path ImFileName;
 
+    bool sameFolders;
+    bool autoLoadVectors;
+
     std::vector<cv::Mat> ImVect;
     std::vector<FileParams> FileParVect;
+
+    int *DirectionalityHist;
+
+    int histogramScaleHeight;
+    int histogramBarWidth;
+    int histogramScaleCoef;
+
+
 
     int imageToShow;
     double imageScale;
@@ -81,6 +92,20 @@ private slots:
     void on_checkBoxShowSape_toggled(bool checked);
 
     void on_checkBoxShowDirection_toggled(bool checked);
+
+    void on_checkBoxSameFolders_toggled(bool checked);
+
+    void on_checkBoxAuloLoadVectors_toggled(bool checked);
+
+    void on_spinBoxHistogramBarWidth_valueChanged(int arg1);
+
+    void on_spinBoxHistogramScaleHeight_valueChanged(int arg1);
+
+
+
+    void on_spinBoxHistogramScaleCoef_valueChanged(int arg1);
+
+
 
 private:
     Ui::MainWindow *ui;

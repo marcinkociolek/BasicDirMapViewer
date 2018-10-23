@@ -10,6 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 
+#include <math.h>
 
 #include <chrono>
 
@@ -54,6 +55,15 @@ MainWindow::MainWindow(QWidget *parent) :
     tileLineWidth = ui->spinBoxShapeLineWidth->value();
     directionLineWidth = ui->spinBoxDirectionLineWidth->value();
     directionLineLenght = ui->doubleSpinBoxDirectionLineLenght->value();
+
+    histogramScaleHeight = ui->spinBoxHistogramScaleHeight->value();
+    histogramBarWidth = ui->spinBoxHistogramBarWidth->value();
+    histogramScaleCoef = ui->spinBoxHistogramScaleCoef->value();
+    DirectionalityHist = 0;
+
+    sameFolders = ui->checkBoxSameFolders->checkState();
+    autoLoadVectors = ui->checkBoxAuloLoadVectors->checkState();
+
 }
 
 MainWindow::~MainWindow()
@@ -267,28 +277,58 @@ int *GetDirHistogramForOneImage(FileParams Params)
     return DirHist;
 }
 //------------------------------------------------------------------------------------------------------------------------------
-void PlotDirHistPlanar(int *Hist, int yScaleHeight, int barWidth)
+void PlotDirHistPlanar(int *Hist, int yScaleHeight, int barWidth, int scaleCoef)
 {
-    Mat ImToShow = Mat(yScaleHeight+30,60+180*(1+barWidth),CV_8UC3,Scalar(255,255,255));
+    const int topOffset = 30;
+    const int bottomOffset = 30;
+    const int scaleBarLenht = 5;
+    const int leftOffset = 60;
+    const int rightOffset = 20;
+    const int digitWidth = 13;
+    const int digitHeight = 10;
+    Mat ImToShow = Mat(yScaleHeight + topOffset + bottomOffset,leftOffset + rightOffset + 180*(1+barWidth),CV_8UC3,Scalar(255,255,255));
 
-    line(ImToShow,Point(49,yScaleHeight + 15),Point(49,10),Scalar(0.0,0.0,0.0,0.0));
-    line(ImToShow,Point(44,yScaleHeight + 11),Point(50+180*(1+barWidth),yScaleHeight + 11),Scalar(0.0,0.0,0.0,0.0));
+    line(ImToShow,Point(leftOffset - 2,yScaleHeight + topOffset),Point(leftOffset - 2,topOffset),Scalar(255.0,0.0,0.0,0.0));
+    line(ImToShow,Point(leftOffset - 2,yScaleHeight + topOffset),Point(leftOffset+180*(1+barWidth),yScaleHeight + topOffset),Scalar(255.0,0.0,0.0,0.0));
+
+    for(int y = 0; y <= yScaleHeight; y+= 50)
+    {
+        line(ImToShow,Point(leftOffset - scaleBarLenht,yScaleHeight + topOffset - y),Point(leftOffset-2 ,yScaleHeight + topOffset - y),Scalar(255.0,0.0,0.0,0.0));
+
+        string text = to_string((int)round((double)y * pow(10.0,scaleCoef * (-1))));
+        int nrOfdigits = (int)(text.size());
+        putText(ImToShow,text,Point(leftOffset - scaleBarLenht -2 - nrOfdigits * digitWidth, yScaleHeight - y + topOffset + digitHeight / 2), FONT_HERSHEY_COMPLEX_SMALL, 1.0, Scalar(255.0,0.0,0.0,0.0));
+    }
+
+    for(int x = 0; x <= 180; x+= 45)
+    {
+        line(ImToShow,Point(leftOffset + x * (1 + barWidth) + barWidth /2, yScaleHeight + topOffset),
+                      Point(leftOffset + x * (1 + barWidth) + barWidth /2,yScaleHeight + topOffset + scaleBarLenht),
+                      Scalar(255.0,0.0,0.0,0.0));
+
+        string text = to_string(x);
+        int nrOfdigits = (int)(text.size());
+        putText(ImToShow,text,Point(leftOffset + x * (1 + barWidth)  - nrOfdigits * digitWidth / 2 ,
+                                    yScaleHeight + topOffset + digitHeight * 2 + scaleBarLenht), FONT_HERSHEY_COMPLEX_SMALL, 1.0, Scalar(255.0,0.0,0.0,0.0));
+    }
+
+    //putText(ImToShow,"0",Point(30,yScaleHeight + 15), FONT_HERSHEY_COMPLEX_SMALL, 1.0, Scalar(255.0,0.0,0.0,0.0));
 
     for(int dir = 0; dir < 180; dir++)
     {
-        int yOffset = yScaleHeight - Hist[dir]*10;
+        int yOffset = yScaleHeight - (int)round((double)Hist[dir] * pow(10.0,scaleCoef));
         int yPosition;
-        Point start = Point(50 + dir*(1 + barWidth),yScaleHeight + 10);
+        Point start = Point(leftOffset + dir*(1 + barWidth),yScaleHeight + topOffset);
         if (yOffset < 0)
         {
-            yPosition = 10;
-            Point stop  = Point(50 + dir*(1 + barWidth) + barWidth - 1,yPosition);
+            yPosition = topOffset;
+            Point stop  = Point(leftOffset + dir*(1 + barWidth) + barWidth - 1,yPosition);
             rectangle(ImToShow,start,stop,Scalar(0.0, 0.0, 255.0, 0.0),CV_FILLED);
         }
         else
         {
-            yPosition = 10 + yOffset;
-            Point stop  = Point(50 + dir*(1 + barWidth) + barWidth - 1,yPosition);
+            yPosition = topOffset + yOffset;
+            Point stop  = Point(leftOffset + dir*(1 + barWidth) + barWidth - 1,yPosition);
             rectangle(ImToShow,start,stop,Scalar(0.0, 0.0, 0.0, 0.0),CV_FILLED);
         }
 
@@ -440,6 +480,8 @@ void MainWindow::LoadVectors()
     ui->spinBoxImageNr->setValue(imageToShow);
     ui->spinBoxImageNr->setMaximum(vectSizeImages - 1);
 
+    ShowImage();
+
 }
 //------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::ShowImage()
@@ -493,10 +535,10 @@ void MainWindow::ShowImage()
     if (imageScale !=1.0)
         cv::resize(ImToShow,ImToShow,Size(),imageScale,imageScale,INTER_NEAREST);
     imshow("Image",ImToShow);
+    delete[] DirectionalityHist;
+    DirectionalityHist = GetDirHistogramForOneImage(Params);
+    PlotDirHistPlanar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef);
 
-    int *Hist = GetDirHistogramForOneImage(Params);
-    PlotDirHistPlanar(Hist,200,2);
-    delete[] Hist;
 
 }
 
@@ -520,6 +562,13 @@ void MainWindow::on_pushButtonOpenDirFolder_clicked()
         return;
 
     OpenDirectionFolder();
+    if(sameFolders)
+    {
+        ImageFolder = DirectionalityFolder;
+        OpenImageFolder();
+        if(autoLoadVectors)
+            LoadVectors();
+    }
 }
 
 void MainWindow::on_pushButtonOpenImageFolder_clicked()
@@ -630,4 +679,33 @@ void MainWindow::on_checkBoxShowDirection_toggled(bool checked)
 {
     showDirection = checked;
     ShowImage();
+}
+
+void MainWindow::on_checkBoxSameFolders_toggled(bool checked)
+{
+    sameFolders = checked;
+}
+
+void MainWindow::on_checkBoxAuloLoadVectors_toggled(bool checked)
+{
+    autoLoadVectors = checked;
+}
+
+void MainWindow::on_spinBoxHistogramBarWidth_valueChanged(int arg1)
+{
+    histogramBarWidth = arg1;
+    PlotDirHistPlanar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef);
+}
+
+
+void MainWindow::on_spinBoxHistogramScaleHeight_valueChanged(int arg1)
+{
+    histogramScaleHeight = arg1;
+    PlotDirHistPlanar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef);
+}
+
+void MainWindow::on_spinBoxHistogramScaleCoef_valueChanged(int arg1)
+{
+    histogramScaleCoef = arg1;
+    PlotDirHistPlanar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef);
 }
