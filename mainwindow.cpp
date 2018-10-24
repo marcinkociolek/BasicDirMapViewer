@@ -412,6 +412,7 @@ void PlotDirHistPolar(int *Hist, int yScale, int barWidth, int scaleCoef, bool s
     imshow("Polar Hist",ImToShow);
 
 }
+
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 //          My functions
@@ -607,6 +608,7 @@ void MainWindow::ShowImage()
     delete[] DirectionalityHist;
     DirectionalityHist = GetDirHistogramForOneImage(Params);
     ShowHistograms();
+    ui->textEditOut->append(QString::fromStdString("Params count" + to_string(Params.ParamsVect[0].paramsCount)));
 
 }
 
