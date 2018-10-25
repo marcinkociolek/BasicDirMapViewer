@@ -807,3 +807,8 @@ void MainWindow::on_checkBoxShowConnected_toggled(bool checked)
     showConnectedDirHistograms = checked;
     ShowHistograms();
 }
+
+void MainWindow::on_spinBoxFeatureNr_valueChanged(int arg1)
+{
+    featureNr = arg1;
+}

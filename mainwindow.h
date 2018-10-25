@@ -34,6 +34,10 @@ public:
     std::vector<cv::Mat> ImVect;
     std::vector<FileParams> FileParVect;
 
+    FeatureHistogram FeatHistogram;
+
+    int featureNr;
+
     int *DirectionalityHist;
 
     int histogramScaleHeight;
@@ -115,6 +119,8 @@ private slots:
     void on_checkBoxShowPolarHistogram_toggled(bool checked);
 
     void on_checkBoxShowConnected_toggled(bool checked);
+
+    void on_spinBoxFeatureNr_valueChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;
