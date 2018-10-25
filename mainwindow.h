@@ -48,6 +48,12 @@ public:
     bool showPolarDirHisogram;
     bool showConnectedDirHistograms;
 
+    int featureHistogramScaleHeight;
+    int featureHistogramBarWidth;
+    int featureHistogramScaleCoef;
+
+    bool showFeataureHisogram;
+
     int imageToShow;
     double imageScale;
 
@@ -121,6 +127,14 @@ private slots:
     void on_checkBoxShowConnected_toggled(bool checked);
 
     void on_spinBoxFeatureNr_valueChanged(int arg1);
+
+    void on_checkBoxShowFeatureHistogram_toggled(bool checked);
+
+    void on_spinBoxFeatureHistogramBarWidth_valueChanged(int arg1);
+
+    void on_spinBoxFeatureHistogramScaleHeight_valueChanged(int arg1);
+
+    void on_spinBoxFeatureHistogramScaleCoef_valueChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;

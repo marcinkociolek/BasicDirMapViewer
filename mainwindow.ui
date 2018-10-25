@@ -110,7 +110,7 @@
     <property name="geometry">
      <rect>
       <x>510</x>
-      <y>390</y>
+      <y>420</y>
       <width>381</width>
       <height>121</height>
      </rect>
@@ -464,7 +464,7 @@
     <widget class="QSpinBox" name="spinBoxHistogramBarWidth">
      <property name="geometry">
       <rect>
-       <x>80</x>
+       <x>90</x>
        <y>60</y>
        <width>43</width>
        <height>22</height>
@@ -483,7 +483,7 @@
     <widget class="QSpinBox" name="spinBoxHistogramScaleCoef">
      <property name="geometry">
       <rect>
-       <x>60</x>
+       <x>70</x>
        <y>120</y>
        <width>61</width>
        <height>22</height>
@@ -550,7 +550,7 @@
     <widget class="QSpinBox" name="spinBoxHistogramScaleHeight">
      <property name="geometry">
       <rect>
-       <x>80</x>
+       <x>90</x>
        <y>90</y>
        <width>43</width>
        <height>22</height>
@@ -587,9 +587,9 @@
     <property name="geometry">
      <rect>
       <x>690</x>
-      <y>260</y>
-      <width>120</width>
-      <height>80</height>
+      <y>250</y>
+      <width>141</width>
+      <height>171</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -607,6 +607,12 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <number>10</number>
+     </property>
     </widget>
     <widget class="QLabel" name="labelFeatureNr">
      <property name="geometry">
@@ -619,6 +625,114 @@
      </property>
      <property name="text">
       <string>Feature Nr</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spinBoxFeatureHistogramScaleHeight">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>110</y>
+       <width>43</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>10</number>
+     </property>
+     <property name="singleStep">
+      <number>1</number>
+     </property>
+     <property name="value">
+      <number>2</number>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spinBoxFeatureHistogramScaleCoef">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>140</y>
+       <width>61</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="suffix">
+      <string/>
+     </property>
+     <property name="prefix">
+      <string>*10^</string>
+     </property>
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <number>5</number>
+     </property>
+     <property name="value">
+      <number>1</number>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spinBoxFeatureHistogramBarWidth">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>80</y>
+       <width>43</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>5</number>
+     </property>
+     <property name="value">
+      <number>5</number>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxShowFeatureHistogram">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>111</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show cartesian</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelDirHistBarWidth_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>71</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Bar Width</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelMaxHistScale_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>71</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Scale</string>
      </property>
     </widget>
    </widget>

@@ -68,6 +68,14 @@ MainWindow::MainWindow(QWidget *parent) :
     showPolarDirHisogram = ui->checkBoxShowPolarHistogram->checkState();
     showConnectedDirHistograms = ui->checkBoxShowConnected->checkState();
 
+    featureNr = ui->spinBoxFeatureNr->value();
+
+    featureHistogramScaleHeight = ui->spinBoxFeatureHistogramScaleHeight->value();
+    featureHistogramBarWidth = ui->spinBoxFeatureHistogramBarWidth->value();
+    featureHistogramScaleCoef = ui->spinBoxFeatureHistogramScaleCoef->value();
+
+    showFeataureHisogram = ui->checkBoxShowFeatureHistogram->checkState();
+
 }
 
 MainWindow::~MainWindow()
@@ -608,6 +616,9 @@ void MainWindow::ShowImage()
     delete[] DirectionalityHist;
     DirectionalityHist = GetDirHistogramForOneImage(Params);
     ShowHistograms();
+    ui->spinBoxFeatureNr->setMaximum(Params.ParamsVect[0].paramsCount - 1);
+    featureNr = ui->spinBoxFeatureNr->value();
+
     ui->textEditOut->append(QString::fromStdString("Params count" + to_string(Params.ParamsVect[0].paramsCount)));
 
 }
@@ -619,6 +630,11 @@ void MainWindow::ShowHistograms()
     if(showPolarDirHisogram)
         PlotDirHistPolar(DirectionalityHist,histogramScaleHeight,histogramBarWidth,histogramScaleCoef,showConnectedDirHistograms);
 
+    if(showFeataureHisogram)
+    {
+        FeatHistogram.GetHitogram(FileParVect[imageToShow], featureNr);
+        FeatHistogram.PlotDirHistPlanar(featureHistogramScaleHeight,featureHistogramScaleCoef,featureHistogramBarWidth);
+    }
 }
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
@@ -811,4 +827,29 @@ void MainWindow::on_checkBoxShowConnected_toggled(bool checked)
 void MainWindow::on_spinBoxFeatureNr_valueChanged(int arg1)
 {
     featureNr = arg1;
+    ShowHistograms();
+}
+
+void MainWindow::on_checkBoxShowFeatureHistogram_toggled(bool checked)
+{
+    showFeataureHisogram = checked;
+    ShowHistograms();
+}
+
+void MainWindow::on_spinBoxFeatureHistogramBarWidth_valueChanged(int arg1)
+{
+    featureHistogramBarWidth = arg1;
+    ShowHistograms();
+}
+
+void MainWindow::on_spinBoxFeatureHistogramScaleHeight_valueChanged(int arg1)
+{
+    featureHistogramScaleHeight = arg1;
+    ShowHistograms();
+}
+
+void MainWindow::on_spinBoxFeatureHistogramScaleCoef_valueChanged(int arg1)
+{
+    featureHistogramScaleCoef = arg1;
+    ShowHistograms();
 }
