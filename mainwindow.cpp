@@ -853,3 +853,17 @@ void MainWindow::on_spinBoxFeatureHistogramScaleCoef_valueChanged(int arg1)
     featureHistogramScaleCoef = arg1;
     ShowHistograms();
 }
+
+void MainWindow::on_listWidgetDirFiles_currentRowChanged(int currentRow)
+{
+    ui->spinBoxImageNr->setValue(currentRow);
+    ShowImage();
+    ShowHistograms();
+}
+
+void MainWindow::on_listWidgetImageFiles_currentRowChanged(int currentRow)
+{
+    ui->spinBoxImageNr->setValue(currentRow);
+    ShowImage();
+    ShowHistograms();
+}

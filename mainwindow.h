@@ -136,6 +136,10 @@ private slots:
 
     void on_spinBoxFeatureHistogramScaleCoef_valueChanged(int arg1);
 
+    void on_listWidgetDirFiles_currentRowChanged(int currentRow);
+
+    void on_listWidgetImageFiles_currentRowChanged(int currentRow);
+
 private:
     Ui::MainWindow *ui;
 };
