@@ -523,6 +523,7 @@ void MainWindow::LoadVectors()
         if (!exists(PathLocal))
         {
             ui->textEditOut->append(QString::fromStdString("File : " + PathLocal.filename().string() + " - not exists \n" ));
+            continue;
         }
         Mat ImLocal;
         ImLocal = imread(PathLocal.string(), CV_LOAD_IMAGE_ANYDEPTH);
@@ -543,6 +544,7 @@ void MainWindow::LoadVectors()
         if (!exists(PathLocal))
         {
             ui->textEditOut->append(QString::fromStdString("File : " + PathLocal.filename().string() + " - not exists \n" ));
+            continue;
         }
         FileParams ParamsLocal = GetDirectionData(PathLocal.string());
 
