@@ -25,6 +25,7 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp\
+        ../../ProjectsLib/LibMarcin/NormalizationLib.cpp \
         ../../ProjectsLib/LibMarcin/DispLib.cpp \
         ../../ProjectsLib/LibMarcin/StringFcLib.cpp \
         ../../ProjectsLib/LibMarcin/tileparams.cpp  \
@@ -33,6 +34,7 @@ SOURCES += \
 
 HEADERS += \
         mainwindow.h\
+        ../../ProjectsLib/LibMarcin/NormalizationLib.h \
          ../../ProjectsLib/LibMarcin/DispLib.h \
          ../../ProjectsLib/LibMarcin/StringFcLib.h \
          ../../ProjectsLib/LibMarcin/tileparams.h \

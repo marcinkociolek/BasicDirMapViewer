@@ -19,6 +19,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 //#include "gradient.h"
+#include "NormalizationLib.h"
 #include "DispLib.h"
 #include "StringFcLib.h"
 #include "tileparams.h"
@@ -44,6 +45,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboBoxImageScale->addItem("Images scale x 1/4");
     ui->comboBoxImageScale->setCurrentIndex(2);
     imageScale = 1.0;
+
+    ui->comboBoxDisplayRange->addItem("user selected");
+    ui->comboBoxDisplayRange->addItem("Image Min Max");
+    ui->comboBoxDisplayRange->addItem("Image Mean +/- STD");
+    ui->comboBoxDisplayRange->addItem("Image 1%-99%");
 
     showSudocolor = ui->checkBoxShowSudoColor->checkState();
     minIm = ui->doubleSpinBoxImMin->value();
@@ -420,7 +426,75 @@ void PlotDirHistPolar(int *Hist, int yScale, int barWidth, int scaleCoef, bool s
     imshow("Polar Hist",ImToShow);
 
 }
+//------------------------------------------------------------------------------------------------------------------------------
+double FindResultingDirection(int *DirectionHistogram)
+{
+    double longestResultingVector = 0;
+    double resultingDirection = -1000;
+    for(int startDir = 0; startDir<180; startDir++)
+    {
+        double a = 0.0;
+        double b = 0.0;
+        int stopDir = startDir + 180;
 
+        for(int dir = startDir; dir < stopDir; dir++)
+        {
+            int normDir;
+            if(dir < 180)
+                normDir = dir;
+            else
+                normDir = dir - 180;
+            double length = (double)DirectionHistogram[normDir];
+            a += length * cos((double)dir/180.0*PI);
+            b += length * sin((double)dir/180.0*PI);
+        }
+        double localLength = sqrt(a*a+b*b);
+        if(longestResultingVector < localLength)
+        {
+            longestResultingVector = localLength;
+            if(a == 0.0 && b == 0.0)
+                resultingDirection = -1000.0;
+            else
+                resultingDirection = atan2(b,a)/PI*180.0;
+
+        }
+    }
+    if(resultingDirection < 0.0)
+        resultingDirection += 360.0;
+    if (resultingDirection >= 180.0)
+        resultingDirection -=180.0;
+    if(resultingDirection < 0.0 || resultingDirection > 180.0)
+        return -1000.0;
+
+    return resultingDirection;
+}
+//----------------------------------------------------------------------------------
+double FindSpread(int *DirectionHistogram, double resultingDir)
+{
+    if (resultingDir < -999.0)
+        return -1000.0;
+
+    int startDir =  (int)round(resultingDir) - 90;
+    int stopDir = startDir + 180;
+    double sum = 0;
+    double count = 0;
+    for(int dir = startDir; dir < stopDir; dir++)
+    {
+        int normDir;
+        normDir = dir;
+        if(normDir >= 180)
+            normDir = dir - 180;
+        if(normDir < 0)
+            normDir = dir + 180;
+        sum += (resultingDir - dir) * (resultingDir - dir) * DirectionHistogram[normDir];
+        count += DirectionHistogram[normDir];
+    }
+    if(count != 0.0)
+        return sqrt(sum/count);
+    else
+        return -2000.0;
+}
+//----------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 //          My functions
@@ -571,6 +645,8 @@ void MainWindow::ShowImage()
 
     Mat ImIn = ImVect[imageToShow];
 
+    GetDisplayParams();
+
     FileParams Params = FileParVect[imageToShow];
 
     Mat ImToShow;
@@ -621,7 +697,13 @@ void MainWindow::ShowImage()
     ui->spinBoxFeatureNr->setMaximum(Params.ParamsVect[0].paramsCount - 1);
     featureNr = ui->spinBoxFeatureNr->value();
 
-    ui->textEditOut->append(QString::fromStdString("Params count" + to_string(Params.ParamsVect[0].paramsCount)));
+    //ui->textEditOut->append(QString::fromStdString("Params count" + to_string(Params.ParamsVect[0].paramsCount)));
+
+    double resultingDirection = FindResultingDirection(DirectionalityHist);
+    double directionSpread  = FindSpread(DirectionalityHist, resultingDirection);
+
+    ui->textEditOut->append(QString::fromStdString("resulting direction: " + to_string(resultingDirection) +
+                                                   " direction spread: " + to_string(directionSpread)));
 
 }
 
@@ -638,6 +720,36 @@ void MainWindow::ShowHistograms()
         FeatHistogram.PlotDirHistPlanar(featureHistogramScaleHeight,featureHistogramScaleCoef,featureHistogramBarWidth);
     }
 }
+//------------------------------------------------------------------------------------------------------------------------------
+void MainWindow::GetDisplayParams()
+{
+    //float maxImVal, minImVal;
+    Mat ImIn = ImVect[imageToShow];
+
+    switch (ui->comboBoxDisplayRange->currentIndex())
+    {
+    case 1:
+        NormParamsMinMax(ImIn, &maxIm, &minIm);
+        //ui->doubleSpinBoxImMax->setValue(maxImVal);
+        //ui->doubleSpinBoxImMin->setValue(minImVal);
+        break;
+    case 2:
+        NormParamsMeanP3Std(ImIn, &maxIm, &minIm);
+        //ui->doubleSpinBoxImMax->setValue(maxImVal);
+        //ui->doubleSpinBoxImMin->setValue(minImVal);
+        break;
+    case 3:
+        NormParams1to99perc(ImIn, &maxIm, &minIm);
+        //ui->doubleSpinBoxImMax->setValue(maxImVal);
+        //ui->doubleSpinBoxImMin->setValue(minImVal);
+        break;
+
+
+    default:
+        break;
+    }
+}
+
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 //          Slots
@@ -859,13 +971,13 @@ void MainWindow::on_spinBoxFeatureHistogramScaleCoef_valueChanged(int arg1)
 void MainWindow::on_listWidgetDirFiles_currentRowChanged(int currentRow)
 {
     ui->spinBoxImageNr->setValue(currentRow);
-    ShowImage();
-    ShowHistograms();
+    //ShowImage();
+    //ShowHistograms();
 }
 
 void MainWindow::on_listWidgetImageFiles_currentRowChanged(int currentRow)
 {
     ui->spinBoxImageNr->setValue(currentRow);
-    ShowImage();
-    ShowHistograms();
+    //ShowImage();
+    //ShowHistograms();
 }

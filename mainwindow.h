@@ -75,6 +75,7 @@ public:
     void LoadVectors();
     void ShowImage();
     void ShowHistograms();
+    void GetDisplayParams();
     //FileParams  MainWindow::GetDirectionData(path FileToOpen);
 
 private slots:
