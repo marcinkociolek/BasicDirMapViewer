@@ -86,6 +86,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    while(!ImVect.empty())
+    {
+        ImVect.back().release();
+        ImVect.pop_back();
+    }
+
+    while(!FileParVect.empty())
+    {
+        FileParVect.back().~FileParams();
+
+        FileParVect.pop_back();
+    }
+
     delete ui;
 }
 //------------------------------------------------------------------------------------------------------------------------------
