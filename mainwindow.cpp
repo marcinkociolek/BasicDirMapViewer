@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+
     ui->comboBoxImageScale->addItem("Images scale x 4");
     ui->comboBoxImageScale->addItem("Images scale x 2");
     ui->comboBoxImageScale->addItem("Images scale x 1");
@@ -86,6 +87,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+
     while(!ImVect.empty())
     {
         ImVect.back().release();
@@ -546,7 +548,7 @@ double FindStdOfFeature(FileParams Params,double mean, int featureNr)
         }
     }
 
-    return sqrt(mean)/counter;
+    return sqrt(sum)/counter;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------

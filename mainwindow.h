@@ -22,11 +22,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    //boost::filesystem::path FileToOpen;
     boost::filesystem::path DirectionalityFolder;
     boost::filesystem::path ImageFolder;
     boost::filesystem::path OutFolder;
-    //boost::filesystem::path ImFileName;
 
     bool sameFolders;
     bool autoLoadVectors;
