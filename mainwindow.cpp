@@ -508,6 +508,47 @@ double FindSpread(int *DirectionHistogram, double resultingDir)
         return -2000.0;
 }
 //----------------------------------------------------------------------------------
+double FindMeanOfFeature(FileParams Params,int featureNr)
+{
+    double mean = 0.0;
+    double counter = 0.0;
+    int numOfTiles = Params.ParamsVect.size();
+    if( Params.ParamsVect[0].Params.size() <= featureNr)
+        return -11111.0;
+
+    for(int tile = 0; tile < numOfTiles; tile++)
+    {
+        if( Params.ParamsVect[tile].Params.size() > featureNr)
+        {
+            mean += Params.ParamsVect[tile].Params[featureNr];
+            counter += 1.0;
+        }
+    }
+
+    return mean/counter;
+}
+//----------------------------------------------------------------------------------
+double FindStdOfFeature(FileParams Params,double mean, int featureNr)
+{
+    double sum = 0.0;
+    double counter = 0.0;
+    int numOfTiles = Params.ParamsVect.size();
+    if( Params.ParamsVect[0].Params.size() <= featureNr)
+        return -11111.0;
+
+    for(int tile = 0; tile < numOfTiles; tile++)
+    {
+        if( Params.ParamsVect[tile].Params.size() > featureNr)
+        {
+            double diff = mean - Params.ParamsVect[tile].Params[featureNr];
+            sum += (diff * diff);
+            counter += 1.0;
+        }
+    }
+
+    return sqrt(mean)/counter;
+}
+
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 //          My functions
@@ -993,4 +1034,79 @@ void MainWindow::on_listWidgetImageFiles_currentRowChanged(int currentRow)
     ui->spinBoxImageNr->setValue(currentRow);
     //ShowImage();
     //ShowHistograms();
+}
+
+void MainWindow::on_pushButtonCalculateStatistics_clicked()
+{
+    if(FileParVect.empty())
+        return;
+
+    int nrOfFiles = FileParVect.size();
+
+    string OutText = "";
+    OutText += "FileName\t";
+    OutText += "Resulting Direction\t";
+    OutText += "Direction Spread\t";
+
+
+
+
+
+    int nrOfFeatures = FileParVect[0].ValueCount;
+
+    for(int i = 5; i < nrOfFeatures; i++)
+    {
+        OutText += "mean " + FileParVect[0].NamesVector[i] ;
+        OutText += "\t";
+    }
+    for(int i = 5; i < nrOfFeatures; i++)
+    {
+        OutText += "std " + FileParVect[0].NamesVector[i] ;
+        OutText += "\t";
+    }
+
+    OutText += "\n";
+    for(int i = 0; i < nrOfFiles; i++)
+    {
+        string textTemp="\t";
+
+        FileParams Params = FileParVect[i];
+
+        OutText += Params.ImFileName.stem().string();
+        OutText += "\t";
+        delete[] DirectionalityHist;
+        DirectionalityHist = GetDirHistogramForOneImage(Params);
+
+
+        double resultingDirection = FindResultingDirection(DirectionalityHist);
+        double directionSpread  = FindSpread(DirectionalityHist, resultingDirection);
+
+        OutText += to_string(resultingDirection) + "\t";
+        OutText += to_string(directionSpread) + "\t";
+
+        for(int k = 3; k < nrOfFeatures - 3; k++)
+        {
+            double meanfeatureVal = FindMeanOfFeature(Params,k);
+            OutText += to_string(meanfeatureVal) + "\t";
+            textTemp += to_string(FindStdOfFeature(Params, meanfeatureVal, k)) + "\t";
+        }
+
+
+        OutText += textTemp;
+
+        OutText += "\n";
+    }
+
+    path textOutFile = DirectionalityFolder;
+
+    textOutFile.append("Summary.out");
+
+    std::ofstream out (textOutFile.string());
+    out << OutText;
+    out.close();
+
+
+
+
+
 }

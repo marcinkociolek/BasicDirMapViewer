@@ -141,6 +141,8 @@ private slots:
 
     void on_listWidgetImageFiles_currentRowChanged(int currentRow);
 
+    void on_pushButtonCalculateStatistics_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
