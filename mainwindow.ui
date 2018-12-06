@@ -321,7 +321,7 @@
      <string>Show shape</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
@@ -379,7 +379,7 @@
      <number>0</number>
     </property>
     <property name="value">
-     <double>20.000000000000000</double>
+     <double>15.000000000000000</double>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBoxSameFolders">
@@ -395,7 +395,7 @@
      <string>The same folders</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBoxAuloLoadVectors">
@@ -411,7 +411,7 @@
      <string>Autoload vectors</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QFrame" name="frame">

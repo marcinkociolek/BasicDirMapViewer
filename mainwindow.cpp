@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboBoxDisplayRange->addItem("Image Min Max");
     ui->comboBoxDisplayRange->addItem("Image Mean +/- STD");
     ui->comboBoxDisplayRange->addItem("Image 1%-99%");
+    ui->comboBoxDisplayRange->setCurrentIndex(2);
 
     showSudocolor = ui->checkBoxShowSudoColor->checkState();
     minIm = ui->doubleSpinBoxImMin->value();
@@ -88,19 +89,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
 
-    while(!ImVect.empty())
-    {
-        ImVect.back().release();
-        ImVect.pop_back();
-    }
-
-    while(!FileParVect.empty())
-    {
-        FileParVect.back().~FileParams();
-
-        FileParVect.pop_back();
-    }
-
+    FreeImageVectors();
     delete ui;
 }
 //------------------------------------------------------------------------------------------------------------------------------
@@ -550,6 +539,48 @@ double FindStdOfFeature(FileParams Params,double mean, int featureNr)
 
     return sqrt(sum)/counter;
 }
+//----------------------------------------------------------------------------------
+double FindMaxOfFeature(FileParams Params, int featureNr)
+{
+
+    int numOfTiles = Params.ParamsVect.size();
+    if( Params.ParamsVect[0].Params.size() <= featureNr)
+        return -11111.0;
+
+    double max = Params.ParamsVect[0].Params[featureNr];
+    for(int tile = 1; tile < numOfTiles; tile++)
+    {
+        if( Params.ParamsVect[tile].Params.size() > featureNr)
+        {
+            double val = Params.ParamsVect[tile].Params[featureNr];
+            if(max < val)
+                max = val;
+        }
+    }
+
+    return max;
+}
+//----------------------------------------------------------------------------------
+double FindMinOfFeature(FileParams Params, int featureNr)
+{
+
+    int numOfTiles = Params.ParamsVect.size();
+    if( Params.ParamsVect[0].Params.size() <= featureNr)
+        return -11111.0;
+
+    double min = Params.ParamsVect[0].Params[featureNr];
+    for(int tile = 1; tile < numOfTiles; tile++)
+    {
+        if( Params.ParamsVect[tile].Params.size() > featureNr)
+        {
+            double val = Params.ParamsVect[tile].Params[featureNr];
+            if(min > val)
+                min = val;
+        }
+    }
+
+    return min;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
@@ -619,6 +650,7 @@ void MainWindow::OpenImageFolder()
 //------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::FreeImageVectors()
 {
+    ui->textEditOut->clear();
     while(ImVect.size() > 0)
     {
         ImVect.back().release();
@@ -1049,10 +1081,7 @@ void MainWindow::on_pushButtonCalculateStatistics_clicked()
     OutText += "FileName\t";
     OutText += "Resulting Direction\t";
     OutText += "Direction Spread\t";
-
-
-
-
+    OutText += "\t";
 
     int nrOfFeatures = FileParVect[0].ValueCount;
 
@@ -1060,18 +1089,17 @@ void MainWindow::on_pushButtonCalculateStatistics_clicked()
     {
         OutText += "mean " + FileParVect[0].NamesVector[i] ;
         OutText += "\t";
-    }
-    for(int i = 5; i < nrOfFeatures; i++)
-    {
         OutText += "std " + FileParVect[0].NamesVector[i] ;
         OutText += "\t";
+        OutText += "min " + FileParVect[0].NamesVector[i] ;
+        OutText += "\t";
+        OutText += "max " + FileParVect[0].NamesVector[i] ;
+        OutText += "\t\t";
     }
 
     OutText += "\n";
     for(int i = 0; i < nrOfFiles; i++)
     {
-        string textTemp="\t";
-
         FileParams Params = FileParVect[i];
 
         OutText += Params.ImFileName.stem().string();
@@ -1085,17 +1113,17 @@ void MainWindow::on_pushButtonCalculateStatistics_clicked()
 
         OutText += to_string(resultingDirection) + "\t";
         OutText += to_string(directionSpread) + "\t";
+        OutText += "\t";
 
         for(int k = 3; k < nrOfFeatures - 3; k++)
         {
             double meanfeatureVal = FindMeanOfFeature(Params,k);
             OutText += to_string(meanfeatureVal) + "\t";
-            textTemp += to_string(FindStdOfFeature(Params, meanfeatureVal, k)) + "\t";
+            OutText += to_string(FindStdOfFeature(Params, meanfeatureVal, k)) + "\t";
+            OutText += to_string(FindMinOfFeature(Params, k)) + "\t";
+            OutText += to_string(FindMaxOfFeature(Params, k)) + "\t";
+            OutText += "\t";
         }
-
-
-        OutText += textTemp;
-
         OutText += "\n";
     }
 
@@ -1107,8 +1135,5 @@ void MainWindow::on_pushButtonCalculateStatistics_clicked()
     out << OutText;
     out.close();
 
-
-
-
-
 }
+
