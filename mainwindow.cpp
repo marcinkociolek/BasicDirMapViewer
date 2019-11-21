@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
     histogramScaleHeight = ui->spinBoxHistogramScaleHeight->value();
     histogramBarWidth = ui->spinBoxHistogramBarWidth->value();
     histogramScaleCoef = ui->spinBoxHistogramScaleCoef->value();
-    DirectionalityHist = 0;
+    DirectionalityHist = nullptr;
 
     sameFolders = ui->checkBoxSameFolders->checkState();
     autoLoadVectors = ui->checkBoxAuloLoadVectors->checkState();
@@ -240,6 +240,8 @@ FileParams  GetDirectionData(path FileToOpen)
 
 void ShowShape(Mat ImShow, int x,int y, int tileShape, int tileSize, int tileLineThickness, Scalar LineColor)
 {
+    if(ImShow.empty())
+        return;
     switch (tileShape)
     {
     case 1:
@@ -301,6 +303,8 @@ int *GetDirHistogramForOneImage(FileParams Params)
 //------------------------------------------------------------------------------------------------------------------------------
 void PlotDirHistPlanar(int *Hist, int yScale, int barWidth, int scaleCoef)
 {
+    if(Hist == nullptr)
+        return;
     const int topOffset = 30;
     const int bottomOffset = 30;
     const int scaleBarLenht = 5;
@@ -363,6 +367,8 @@ void PlotDirHistPlanar(int *Hist, int yScale, int barWidth, int scaleCoef)
 //------------------------------------------------------------------------------------------------------------------------------
 void PlotDirHistPolar(int *Hist, int yScale, int barWidth, int scaleCoef, bool showConnected)
 {
+    if(Hist == nullptr)
+        return;
     const int topOffset = 30;
     const int bottomOffset = 30;
     const int scaleBarLenht = 5;
@@ -716,6 +722,9 @@ void MainWindow::LoadVectors()
     int vectSizeDirections = ImVect.size();
 
     ui->textEditOut->append(QString::fromStdString("Direction file count: " + to_string(vectSizeDirections)));
+
+    if(ImVect.empty())
+        return;
 
     imageToShow = 0;
 
