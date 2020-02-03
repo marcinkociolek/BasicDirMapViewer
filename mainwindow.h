@@ -141,6 +141,8 @@ private slots:
 
     void on_pushButtonCalculateStatistics_clicked();
 
+    void on_pushButtonSF_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

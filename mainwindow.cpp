@@ -89,6 +89,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
 
+
     FreeImageVectors();
     delete ui;
 }
@@ -656,7 +657,7 @@ void MainWindow::OpenImageFolder()
 //------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::FreeImageVectors()
 {
-    ui->textEditOut->clear();
+    //ui->textEditOut->clear();
     while(ImVect.size() > 0)
     {
         ImVect.back().release();
@@ -1146,3 +1147,18 @@ void MainWindow::on_pushButtonCalculateStatistics_clicked()
 
 }
 
+
+void MainWindow::on_pushButtonSF_clicked()
+{
+    if(FileParVect.empty())
+        return;
+
+    size_t size = FileParVect.size();
+    for(size_t i = 0; i< size; i++)
+    {
+        string LocalFileName = FileParVect[i].ImFileName.stem().string();
+        string outStr = regex_replace(LocalFileName, regex(".+n"), "");
+        int dir = stoi(outStr);
+        ui->textEditOut->append(QString::fromStdString(LocalFileName + " ->" + outStr + " ->" + to_string(dir)));
+    }
+}

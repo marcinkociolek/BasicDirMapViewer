@@ -395,7 +395,7 @@
      <string>The same folders</string>
     </property>
     <property name="checked">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBoxAuloLoadVectors">
@@ -760,6 +760,19 @@
     </property>
     <property name="text">
      <string>Calculate statistics</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonSF">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>500</y>
+      <width>80</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>SF</string>
     </property>
    </widget>
   </widget>
